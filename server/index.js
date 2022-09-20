@@ -25,9 +25,14 @@ app.post("/api/instrument", async (req, res) => {
         .query(
             `
     INSERT INTO instruments (name, family, price, image_url)
-    VALUES ('${name}', ${family}, ${price},'${imgURL}');`
+    VALUES ('${name}', ${family}, ${price},'${imgURL}') 
+    RETURNING *;`
         )
-        .catch((err) => console.log(err));
+        .then((dbRes) => res.status(200).send(dbRes))
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send(err);
+        });
     res.status(200).send("hey front end, it worked");
 });
 
