@@ -1,23 +1,31 @@
 import logo from "./logo.svg";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import "./App.css";
 import axios from "axios";
+import InstrumentCard from "./InstrumentCard";
 
 function App() {
     const [name, setName] = useState("");
     const [price, setPrice] = useState(0);
     const [imgURL, setImageURL] = useState("");
     const [family, setFamily] = useState(1);
+    const [instrumentList, setInstrumentList] = useState([]);
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:4646/api/instrument")
+            .then((response) => {
+                console.log("THIS IS FROM THE USEEFFECT", response.data);
+                setInstrumentList(response.data);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     let handleSubmit = (e) => {
         e.preventDefault();
-        // console.log({
-        //     name,
-        //     family,
-        //     price,
-        //     imgURL,
-        // });
         axios
             .post("http://localhost:4646/api/instrument", {
                 name,
@@ -26,12 +34,17 @@ function App() {
                 imgURL,
             })
             .then((response) => {
-                console.log(response);
+                console.log(response.data[0]);
+                setInstrumentList(response.data[0]);
             })
             .catch((err) => {
                 console.log(err);
             });
     };
+
+    let mappedInstruments = instrumentList.map((instrument) => {
+        return <InstrumentCard instrument={instrument} />;
+    });
 
     return (
         <div className="App">
@@ -76,6 +89,11 @@ function App() {
                 </label>
                 <button onClick={(e) => handleSubmit(e)}>Add Instrument</button>
             </form>
+            <div>
+                {mappedInstruments.length
+                    ? mappedInstruments
+                    : "No instruments found"}
+            </div>
         </div>
     );
 }

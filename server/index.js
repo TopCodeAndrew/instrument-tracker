@@ -17,6 +17,23 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
 app.use(express.json());
 app.use(cors());
 
+app.get("/api/instrument", async (req, res) => {
+    await sequelize
+        .query(
+            `
+    SELECT * from instruments;
+    `
+        )
+        .then((dbRes) => {
+            console.log(dbRes[0]);
+            res.status(200).send(dbRes[0]);
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).send(err);
+        });
+});
+
 app.post("/api/instrument", async (req, res) => {
     const { name, family, price, imgURL } = req.body;
     // console.log(name, family, price, imgURL);
@@ -25,8 +42,10 @@ app.post("/api/instrument", async (req, res) => {
         .query(
             `
     INSERT INTO instruments (name, family, price, image_url)
-    VALUES ('${name}', ${family}, ${price},'${imgURL}') 
-    RETURNING *;`
+    VALUES ('${name}', ${family}, ${price},'${imgURL}');
+    
+    SELECT * from instruments;
+    `
         )
         .then((dbRes) => res.status(200).send(dbRes))
         .catch((err) => {
